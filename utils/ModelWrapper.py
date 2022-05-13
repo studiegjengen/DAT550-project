@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.utils import model_to_dot, plot_model
+from tensorflow.keras.utils import model_to_dot, plot_model, image_dataset_from_directory
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 import wandb
 from wandb.keras import WandbCallback
@@ -15,7 +15,25 @@ class ModelWrapper:
         self.img_size = img_size
         self.batch_size = batch_size
 
-        self._load_data()
+        self._load_data_v2()
+        # self._load_data()
+
+    def _load_data_v2(self):
+        self.train_generator = image_dataset_from_directory(
+            self.data_dir + "/train",
+            # validation_split=0.2,
+            # subset="training",
+            # seed=123,
+            image_size=(self.img_size,   self.img_size),
+            batch_size=self.batch_size)
+
+        self.val_generator = image_dataset_from_directory(
+            self.data_dir + "/validation",
+            # validation_split=0.2,
+            # subset="validation",
+            # seed=123,
+            image_size=(self.img_size,   self.img_size),
+            batch_size=self.batch_size)
 
     def _load_data(self):
         """
@@ -105,7 +123,6 @@ class ModelWrapper:
             steps_per_epoch=len(self.train_generator),
             validation_data=self.val_generator,
             validation_steps=len(self.val_generator),
-
             callbacks=self.custom_callbacks
         )
 
