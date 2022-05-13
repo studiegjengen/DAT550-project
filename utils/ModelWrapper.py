@@ -1,18 +1,12 @@
 import numpy as np
 import pandas as pd
-import os
-import tensorflow as tf
-from tensorflow.keras.optimizers import Adam
-import matplotlib.pyplot as plt
-from tensorflow.keras.applications.resnet import ResNet152
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout
-from tensorflow.keras.preprocessing import image
+from keras.utils import model_to_dot, plot_model
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-from tensorflow.keras.models import load_model
 import wandb
 from wandb.keras import WandbCallback
+import seaborn as sns
 
 
 class ModelWrapper:
@@ -45,7 +39,7 @@ class ModelWrapper:
             color_mode="rgb",
             class_mode="binary",
             batch_size=self.batch_size,
-            shuffle=True
+            shuffle=True,
         )
 
         # loads validation data
@@ -77,6 +71,7 @@ class ModelWrapper:
             Creates a model .
         """
         self.model = Sequential(layers=layers)
+        self.model_file = model_file
         self.custom_callbacks = [
             EarlyStopping(
                 monitor='val_loss',
@@ -105,6 +100,7 @@ class ModelWrapper:
             steps_per_epoch=len(self.train_generator),
             validation_data=self.val_generator,
             validation_steps=len(self.val_generator),
+
             callbacks=self.custom_callbacks
         )
 
@@ -139,6 +135,8 @@ class ModelWrapper:
             [false_positive_real, true_positive_real]
         ])
         print("conf_matrix: \n", conf_matrix)
+        sns.heatmap(conf_matrix, square=True, annot=True,
+                    cmap='Reds', fmt='d', cbar=False)
 
         # Log the resultmatrix to wandb
         wandb.log({
@@ -147,3 +145,8 @@ class ModelWrapper:
             'true_positive_real': true_positive_real,
             'false_positive_real': false_positive_real
         })
+
+    def export_to_png(self):
+        # Save model to png
+        plot_model(
+            self.model, show_shapes=True, show_layer_names=True, to_file=f'images/{self.model_file}_model.png')
