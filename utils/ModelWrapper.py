@@ -10,32 +10,34 @@ import seaborn as sns
 
 
 class ModelWrapper:
-    def __init__(self, data_dir, img_size, batch_size):
+    def __init__(self, data_dir, img_size, batch_size, use_generator=True):
         self.data_dir = data_dir
         self.img_size = img_size
         self.batch_size = batch_size
+        self.use_generator = use_generator
 
-        # self._load_data_v2()
-        self._load_data()
-
-    def _load_data_v2(self):
-        self.train_generator = image_dataset_from_directory(
-            self.data_dir + "/train",
-            # validation_split=0.2,
-            # subset="training",
-            # seed=123,
-            image_size=(self.img_size,   self.img_size),
-            batch_size=self.batch_size)
-
-        self.val_generator = image_dataset_from_directory(
-            self.data_dir + "/validation",
-            # validation_split=0.2,
-            # subset="validation",
-            # seed=123,
-            image_size=(self.img_size,   self.img_size),
-            batch_size=self.batch_size)
+        if use_generator:
+            self._load_generated_data()
+        else:
+            self._load_data()
 
     def _load_data(self):
+        self.train_data = image_dataset_from_directory(
+            self.data_dir + "/train",
+            image_size=(self.img_size,   self.img_size),
+            batch_size=self.batch_size)
+
+        self.val_data = image_dataset_from_directory(
+            self.data_dir + "/validation",
+            image_size=(self.img_size,   self.img_size),
+            batch_size=self.batch_size)
+
+        self.test_data = image_dataset_from_directory(
+            self.data_dir + "/test",
+            image_size=(self.img_size,   self.img_size),
+            batch_size=self.batch_size)
+
+    def _load_generated_data(self):
         """
             Loads traning, validation and test data from the data directory.
         """
@@ -117,28 +119,32 @@ class ModelWrapper:
         """
             Fits the model and returns history
         """
+        train_data = self.train_generator if self.use_generator else self.train_data
+        val_data = self.val_generator if self.use_generator else self.val_data
         return self.model.fit(
-            self.train_generator,
+            train_data,
             epochs=self.config.epochs,
-            steps_per_epoch=len(self.train_generator),
-            validation_data=self.val_generator,
-            validation_steps=len(self.val_generator),
+            steps_per_epoch=len(train_data),
+            validation_data=val_data,
+            validation_steps=len(val_data),
             callbacks=self.custom_callbacks,
             use_multiprocessing=True,
         )
 
     def evaluate_model(self, best_model):
+        test_data = self.test_generator if self.use_generator else self.test_data
         preds = best_model.predict(
-            self.test_generator,
+            test_data,
             verbose=1
         )
-        print("self.test_generator.filenames: ",
-              len(self.test_generator.filenames))
-        print("preds: ", len(preds.flatten()))
-        test_results = pd.DataFrame({
-            "Filename": self.test_generator.filenames,
-            "Prediction": preds.flatten()
-        })
+        if self.use_generator:
+            print("self.test_generator.filenames: ",
+                  len(self.test_generator.filenames))
+            print("preds: ", len(preds.flatten()))
+            test_results = pd.DataFrame({
+                "Filename": self.test_generator.filenames,
+                "Prediction": preds.flatten()
+            })
 
         test_results["Rounded"] = test_results["Prediction"].round()
 
