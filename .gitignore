@@ -60,3 +60,7 @@ data/processed
 *.h5
 
 data
+
+wandb/
+
+__pycache__

@@ -79,15 +79,19 @@ class ModelWrapper:
                 patience=5,
                 verbose=1
             ),
-            ModelCheckpoint(
-                filepath=model_file,
-                monitor='val_loss',
-                mode='min',
-                verbose=1,
-                save_best_only=True
-            ),
-            WandbCallback()
+            WandbCallback(data_type="image")
         ]
+        if model_file != None:
+            self.custom_callbacks.append(
+                ModelCheckpoint(
+                    filepath=model_file,
+                    monitor='val_loss',
+                    mode='min',
+                    verbose=1,
+                    save_best_only=True
+                ),
+            )
+
         self.config = config
 
     def fit(self):
