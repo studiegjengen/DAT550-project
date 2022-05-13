@@ -58,3 +58,5 @@ data/*/*.mp4
 
 data/processed
 *.h5
+
+data
