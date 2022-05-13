@@ -99,7 +99,7 @@ class ModelWrapper:
         """
             Fits the model and returns history
         """
-        return self.model.fit_generator(
+        return self.model.fit(
             self.train_generator,
             epochs=self.config.epochs,
             steps_per_epoch=len(self.train_generator),
