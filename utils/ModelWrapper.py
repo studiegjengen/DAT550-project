@@ -15,8 +15,8 @@ class ModelWrapper:
         self.img_size = img_size
         self.batch_size = batch_size
 
-        self._load_data_v2()
-        # self._load_data()
+        # self._load_data_v2()
+        self._load_data()
 
     def _load_data_v2(self):
         self.train_generator = image_dataset_from_directory(
@@ -123,7 +123,8 @@ class ModelWrapper:
             steps_per_epoch=len(self.train_generator),
             validation_data=self.val_generator,
             validation_steps=len(self.val_generator),
-            callbacks=self.custom_callbacks
+            callbacks=self.custom_callbacks,
+            use_multiprocessing=True,
         )
 
     def evaluate_model(self, best_model):
