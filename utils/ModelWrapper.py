@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.models import Sequential
-from keras.utils import model_to_dot, plot_model
+from tensorflow.keras.utils import model_to_dot, plot_model
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 import wandb
 from wandb.keras import WandbCallback
