@@ -66,7 +66,7 @@ class ModelWrapper:
             shuffle=False
         )
 
-    def create_model(self, model_file, layers, config):
+    def create_model(self, model_file, layers, config, use_wandb=True):
         """
             Creates a model .
         """
@@ -79,8 +79,9 @@ class ModelWrapper:
                 patience=5,
                 verbose=1
             ),
-            WandbCallback(data_type="image")
         ]
+        if use_wandb:
+            self.custom_callbacks.append(WandbCallback(data_type="image"))
         if model_file != None:
             self.custom_callbacks.append(
                 ModelCheckpoint(
