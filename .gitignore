@@ -57,3 +57,4 @@ data/*/*.mp4
 !data/train_sample_videos/cmxcfkrjiv.mp4
 
 data/processed
+*.h5
