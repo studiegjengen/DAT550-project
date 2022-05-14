@@ -1,0 +1,48 @@
+{
+    "abarnvbtwb.mp4": { "label": "REAL", "split": "train", "original": null },
+    "abofeumbvv.mp4": {
+        "label": "FAKE",
+        "split": "train",
+        "original": "atvmxvwyns.mp4"
+      },
+      "abqwwspghj.mp4": {
+        "label": "FAKE",
+        "split": "train",
+        "original": "qzimuostzz.mp4"
+      },
+      "acifjvzvpm.mp4": {
+        "label": "FAKE",
+        "split": "train",
+        "original": "kbvibjhfzo.mp4"
+      },
+      "acqfdwsrhi.mp4": {
+        "label": "FAKE",
+        "split": "train",
+        "original": "ccfoszqabv.mp4"
+      },
+      "acxnxvbsxk.mp4": {
+        "label": "FAKE",
+        "split": "train",
+        "original": "fjlyaizcwc.mp4"
+      },
+      "acxwigylke.mp4": {
+        "label": "FAKE",
+        "split": "train",
+        "original": "ffcwhpnpuw.mp4"
+      },
+      "aczrgyricp.mp4": {
+        "label": "FAKE",
+        "split": "train",
+        "original": "slwkmefgde.mp4"
+      },
+      "adhsbajydo.mp4": {
+        "label": "FAKE",
+        "split": "train",
+        "original": "fysyrqfguw.mp4"
+      },
+      "aagfhgtpmv.mp4": {
+        "label": "FAKE",
+        "split": "train",
+        "original": "vudstovrck.mp4"
+      }
+}
