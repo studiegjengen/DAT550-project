@@ -17,9 +17,9 @@ class ModelWrapper:
         self.use_generator = use_generator
 
         if use_generator:
-            self._load_generated_data(sample_datasets)
+            self._load_generated_data()
         else:
-            self._load_data()
+            self._load_data(sample_datasets)
 
     def _load_data(self, sample_datasets):
         if (sample_datasets):
