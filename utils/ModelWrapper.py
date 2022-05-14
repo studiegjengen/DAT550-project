@@ -194,13 +194,14 @@ class ModelWrapper:
         sns.heatmap(conf_matrix, square=True, annot=True,
                     cmap='Reds', fmt='d', cbar=False)
 
-        # Log the resultmatrix to wandb
-        wandb.log({
-            'true_positive_fake': true_positive_fake,
-            'false_positive_fake': false_positive_fake,
-            'true_positive_real': true_positive_real,
-            'false_positive_real': false_positive_real
-        })
+        if self.use_wandb:
+            # Log the resultmatrix to wandb
+            wandb.log({
+                'true_positive_fake': true_positive_fake,
+                'false_positive_fake': false_positive_fake,
+                'true_positive_real': true_positive_real,
+                'false_positive_real': false_positive_real
+            })
 
     def export_to_png(self):
         """
