@@ -10,27 +10,51 @@ import seaborn as sns
 
 
 class ModelWrapper:
-    def __init__(self, data_dir, img_size, batch_size, use_generator=True):
+    def __init__(self, data_dir, img_size, batch_size, use_generator=True, sample_datasets=False):
         self.data_dir = data_dir
         self.img_size = img_size
         self.batch_size = batch_size
         self.use_generator = use_generator
 
         if use_generator:
-            self._load_generated_data()
+            self._load_generated_data(sample_datasets)
         else:
             self._load_data()
 
-    def _load_data(self):
-        self.train_data = image_dataset_from_directory(
-            self.data_dir + "/train",
-            image_size=(self.img_size,   self.img_size),
-            batch_size=self.batch_size)
+    def _load_data(self, sample_datasets):
+        if (sample_datasets):
+            self.train_data = image_dataset_from_directory(
+                self.data_dir + "/train",
+                image_size=(self.img_size,   self.img_size),
+                validation_split=0.2,
+                subset="validation",
+                seed=123,
+                shuffle=True,
+                batch_size=self.batch_size)
 
-        self.val_data = image_dataset_from_directory(
-            self.data_dir + "/validation",
-            image_size=(self.img_size,   self.img_size),
-            batch_size=self.batch_size)
+            self.val_data = image_dataset_from_directory(
+                self.data_dir + "/validation",
+                image_size=(self.img_size,   self.img_size),
+                validation_split=0.2,
+                subset="validation",
+                seed=123,
+                shuffle=True,
+                batch_size=self.batch_size)
+
+        else:
+            self.train_data = image_dataset_from_directory(
+                self.data_dir + "/train",
+                image_size=(self.img_size,   self.img_size),
+                seed=123,
+                shuffle=True,
+                batch_size=self.batch_size)
+
+            self.val_data = image_dataset_from_directory(
+                self.data_dir + "/validation",
+                image_size=(self.img_size,   self.img_size),
+                seed=123,
+                shuffle=True,
+                batch_size=self.batch_size)
 
         self.test_data = image_dataset_from_directory(
             self.data_dir + "/test",
