@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.utils import model_to_dot, plot_model
+from tensorflow.keras.utils import model_to_dot, plot_model, image_dataset_from_directory
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 import wandb
 from wandb.keras import WandbCallback
@@ -10,14 +10,58 @@ import seaborn as sns
 
 
 class ModelWrapper:
-    def __init__(self, data_dir, img_size, batch_size):
+    def __init__(self, data_dir, img_size, batch_size, use_generator=True, sample_datasets=False):
         self.data_dir = data_dir
         self.img_size = img_size
         self.batch_size = batch_size
+        self.use_generator = use_generator
 
-        self._load_data()
+        if use_generator:
+            self._load_generated_data(sample_datasets)
+        else:
+            self._load_data()
 
-    def _load_data(self):
+    def _load_data(self, sample_datasets):
+        if (sample_datasets):
+            self.train_data = image_dataset_from_directory(
+                self.data_dir + "/train",
+                image_size=(self.img_size,   self.img_size),
+                validation_split=0.2,
+                subset="validation",
+                seed=123,
+                shuffle=True,
+                batch_size=self.batch_size)
+
+            self.val_data = image_dataset_from_directory(
+                self.data_dir + "/validation",
+                image_size=(self.img_size,   self.img_size),
+                validation_split=0.2,
+                subset="validation",
+                seed=123,
+                shuffle=True,
+                batch_size=self.batch_size)
+
+        else:
+            self.train_data = image_dataset_from_directory(
+                self.data_dir + "/train",
+                image_size=(self.img_size,   self.img_size),
+                seed=123,
+                shuffle=True,
+                batch_size=self.batch_size)
+
+            self.val_data = image_dataset_from_directory(
+                self.data_dir + "/validation",
+                image_size=(self.img_size,   self.img_size),
+                seed=123,
+                shuffle=True,
+                batch_size=self.batch_size)
+
+        self.test_data = image_dataset_from_directory(
+            self.data_dir + "/test",
+            image_size=(self.img_size,   self.img_size),
+            batch_size=self.batch_size)
+
+    def _load_generated_data(self):
         """
             Loads traning, validation and test data from the data directory.
         """
@@ -66,7 +110,7 @@ class ModelWrapper:
             shuffle=False
         )
 
-    def create_model(self, model_file, layers, config):
+    def create_model(self, model_file, layers, config, use_wandb=True):
         """
             Creates a model .
         """
@@ -79,8 +123,9 @@ class ModelWrapper:
                 patience=5,
                 verbose=1
             ),
-            WandbCallback(data_type="image")
         ]
+        if use_wandb:
+            self.custom_callbacks.append(WandbCallback(data_type="image"))
         if model_file != None:
             self.custom_callbacks.append(
                 ModelCheckpoint(
@@ -98,28 +143,32 @@ class ModelWrapper:
         """
             Fits the model and returns history
         """
-        return self.model.fit_generator(
-            self.train_generator,
+        train_data = self.train_generator if self.use_generator else self.train_data
+        val_data = self.val_generator if self.use_generator else self.val_data
+        return self.model.fit(
+            train_data,
             epochs=self.config.epochs,
-            steps_per_epoch=len(self.train_generator),
-            validation_data=self.val_generator,
-            validation_steps=len(self.val_generator),
-
-            callbacks=self.custom_callbacks
+            steps_per_epoch=len(train_data),
+            validation_data=val_data,
+            validation_steps=len(val_data),
+            callbacks=self.custom_callbacks,
+            use_multiprocessing=True,
         )
 
     def evaluate_model(self, best_model):
+        test_data = self.test_generator if self.use_generator else self.test_data
         preds = best_model.predict(
-            self.test_generator,
+            test_data,
             verbose=1
         )
-        print("self.test_generator.filenames: ",
-              len(self.test_generator.filenames))
-        print("preds: ", len(preds.flatten()))
-        test_results = pd.DataFrame({
-            "Filename": self.test_generator.filenames,
-            "Prediction": preds.flatten()
-        })
+        if self.use_generator:
+            print("self.test_generator.filenames: ",
+                  len(self.test_generator.filenames))
+            print("preds: ", len(preds.flatten()))
+            test_results = pd.DataFrame({
+                "Filename": self.test_generator.filenames,
+                "Prediction": preds.flatten()
+            })
 
         test_results["Rounded"] = test_results["Prediction"].round()
 
