@@ -64,3 +64,5 @@ data
 wandb/
 
 __pycache__
+
+predict
